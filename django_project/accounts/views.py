@@ -1,10 +1,51 @@
 from django.shortcuts import render, redirect
 from django.forms import inlineformset_factory
-from .models import *
-from .forms import OrderForm
-from .filters import OrderFilter
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
+from .models import *
+from .forms import OrderForm, CreateUserForm
+from .filters import OrderFilter
+
+def registerPage(requests):
+    form = CreateUserForm()
+
+    if requests.method == 'POST':
+        form = CreateUserForm(requests.POST)
+        if form.is_valid():
+            form.save()
+            user=form.cleaned_data.get('username')
+            messages.success(requests, 'Account was created for ' + user)
+
+            return redirect('login')
+
+    context = {'form':form}
+    return render(requests, 'accounts/register.html', context)
+
+def loginPage(requests):
+
+    if requests.method == 'POST':
+        username = requests.POST.get('username')
+        password = requests.POST.get('password')
+
+        user = authenticate(requests, username=username, password=password)
+
+        if user is not None:
+            login(requests, user)
+            return redirect('home')
+        else:
+            messages.info(requests, 'Username or password is incorrect')
+            
+
+    context = {}
+    return render(requests, 'accounts/login.html', context)
+
+def logoutUser(requests):
+    logout(requests)
+    return redirect('Login')
 
 def home(requests):
     orders = Order.objects.all()
