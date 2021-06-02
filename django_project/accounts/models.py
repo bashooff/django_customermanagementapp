@@ -53,3 +53,12 @@ class Order(models.Model):
     
     def __str__(self):
         return self.product.name
+
+class Producer(models.Model):
+    company = models.CharField(max_length=200, null=True)
+    phone = models.CharField(max_length=200, null=True)
+    address = models.CharField(max_length=200, null=True)
+
+    def __str__(self):
+        return self.company
+    
